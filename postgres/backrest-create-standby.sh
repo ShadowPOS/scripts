@@ -72,6 +72,10 @@ read -p "Press enter to stop PostgreSQL and restore the backup..."
 PG_CONF="/etc/postgresql/17/main/postgresql.conf"
 PG_DATA="/var/lib/postgresql/17/main"
 
+sudo -u postgres psql -U postgres -d postgres -c "alter system set wal_level to 'replica';"
+sudo -u postgres psql -U postgres -d postgres -c "alter system set archive_mode to 'off';"
+sudo -u postgres psql -U postgres -d postgres -c "alter system set archive_command to 'pgbackrest --stanza=main archive-get %f %p';"
+
 echo "⚠️  Stopping PostgreSQL to demote..."
 systemctl stop postgresql@17-main
 
@@ -89,13 +93,6 @@ if ! sudo pgbackrest --stanza=main --type=standby --delta restore; then
 fi
 echo "✅ Restore completed successfully."
 
-# Modify WAL settings for standby mode
-sed -i "s/^wal_level.*/wal_level = replica/" "$PG_CONF"
-sed -i "s/^archive_mode.*/archive_mode = off/" "$PG_CONF"
-
-# Update archive_command for standby mode
-sed -i "/^archive_command/d" "$PG_CONF"
-echo "archive_command = 'pgbackrest --stanza=main archive-get %f %p'" >> "$PG_CONF"
 
 # Ensure standby mode is enabled
 rm -f "$PG_DATA/recovery.signal"
