@@ -72,9 +72,9 @@ read -p "Press enter to stop PostgreSQL and restore the backup..."
 PG_CONF="/etc/postgresql/17/main/postgresql.conf"
 PG_DATA="/var/lib/postgresql/17/main"
 
-sudo -u postgres psql -U postgres -d postgres -c "alter system set wal_level to 'replica';"
-sudo -u postgres psql -U postgres -d postgres -c "alter system set archive_mode to 'off';"
-sudo -u postgres psql -U postgres -d postgres -c "alter system set archive_command to 'pgbackrest --stanza=main archive-get %f %p';"
+sudo -u postgres psql -U postgres -d postgres -c "alter system set wal_level = 'replica';"
+sudo -u postgres psql -U postgres -d postgres -c "alter system set archive_mode = 'off';"
+sudo -u postgres psql -U postgres -d postgres -c "alter system set archive_command = 'pgbackrest --stanza=main archive-get %f %p';"
 
 echo "⚠️  Stopping PostgreSQL to demote..."
 systemctl stop postgresql@17-main
